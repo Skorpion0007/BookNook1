@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNook - Enhanced Bookstore & Literary Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Skip to content link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Loading overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification" role="status" aria-live="polite"></div>
+    
+    <!-- Back to top button -->
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <!-- Quick View Modal -->
+    <div id="quickViewModal" class="modal quick-view-modal" role="dialog" aria-modal="true" aria-labelledby="quickViewTitle">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close modal">&times;</span>
+            <div class="quick-view-content" id="quickViewContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Remove Item Modal -->
+    <div id="removeItemModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="removeItemTitle">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close modal">&times;</span>
+            <h3 id="removeItemTitle">Confirm Removal</h3>
+            <p>Are you sure you want to remove this item from your cart?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-outline" id="cancelRemove">Cancel</button>
+                <button class="btn btn-secondary" id="confirmRemove">Remove</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close modal">&times;</span>
+            <div id="checkoutContent">
+                <h3 id="checkoutTitle">Order Confirmation</h3>
+                <div class="checkout-success">
+                    <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin: 20px 0;"></i>
+                    <h3>Thank You For Your Order!</h3>
+                    <p>Your order has been placed successfully. You'll receive a confirmation email shortly.</p>
+                    <p>Order ID: <strong>ORD-20230720</strong></p>
+                    <div class="order-summary" style="margin: 20px 0;">
+                        <p>Total: <strong id="orderTotal"></strong></p>
+                    </div>
+                    <button class="btn" onclick="showPage('home')">Continue Shopping</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <a href="#" class="logo" onclick="showPage('home')">
+                    <i class="fas fa-book-open"></i>Book<span>Nook</span>
+                </a>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search books, authors, genres..." aria-label="Search books">
+                    <button onclick="searchBooks()" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div id="searchSuggestions" class="search-suggestions" style="display:none; position:absolute; width:100%; background:white; box-shadow:var(--shadow); border-radius:var(--border-radius); z-index:100; top:50px;"></div>
+                </div>
+                <div class="user-actions">
+                    <a href="#" id="theme-toggle" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></a>
+                    <a href="#" onclick="showPage('login')" aria-label="User account"><i class="fas fa-user"></i></a>
+                    <a href="#" class="cart-count" data-count="0" onclick="showPage('cart')" aria-label="Shopping cart"><i class="fas fa-shopping-cart"></i></a>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <div class="container">
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showPage('home')">Home</a></li>
+                    <li class="has-dropdown">
+                        <a href="#" aria-haspopup="true" aria-expanded="false">Shop <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown" role="menu">
+                            <li><a href="#" onclick="showPage('bookstore')" role="menuitem">Bookstore</a></li>
+                            <li><a href="#" onclick="showPage('categories')" role="menuitem">Categories</a></li>
+                            <li><a href="#" onclick="showPage('bestsellers')" role="menuitem">Bestsellers</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" onclick="showPage('blog')">Blog</a></li>
+                    <li><a href="#" onclick="showPage('about')">About Us</a></li>
+                    <li><a href="#" onclick="showPage('contact')">Contact</a></li>
+                    <li><a href="#" onclick="showPage('dashboard')">Dashboard</a></li>
+                </ul>
+                <div class="hamburger" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main content -->
+    <main id="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page-section active">
+            <!-- Hero Section -->
+            <div class="hero">
+                <div class="container">
+                    <h1>Discover Your Next Favorite Book</h1>
+                    <p>Explore our curated collection of bestsellers, classics, and hidden gems. Plus, read our blog for literary insights and recommendations.</p>
+                    <div class="hero-btns">
+                        <a href="#" class="btn" onclick="showPage('bookstore')">Shop Books</a>
+                        <a href="#" class="btn btn-secondary" onclick="showPage('blog')">Read Our Blog</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Books Section -->
+            <div class="featured-books">
+                <div class="container">
+                    <h2 class="section-title">Featured Books</h2>
+                    <div class="books-grid">
+                        <!-- Books will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div class="categories">
+                <div class="container">
+                    <h2 class="section-title">Browse Categories</h2>
+                    <div class="categories-grid">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blog Preview Section -->
+            <div class="blog-preview">
+                <div class="container">
+                    <h2 class="section-title">Latest Blog Posts</h2>
+                    <div class="blog-grid">
+                        <!-- Blog posts will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bookstore Page -->
+        <section id="bookstore" class="page-section">
+            <div class="bookstore">
+                <div class="container">
+                    <div class="bookstore-header">
+                        <h2 class="section-title">Bookstore Catalog</h2>
+                        <div class="sort-options">
+                            <select class="form-control" id="sortSelect" aria-label="Sort books">
+                                <option value="popularity">Sort by: Popularity</option>
+                                <option value="newest">Sort by: Newest</option>
+                                <option value="price-low">Sort by: Price: Low to High</option>
+                                <option value="price-high">Sort by: Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-section">
+                            <h4>Genres</h4>
+                            <div class="filter-options" id="genreFilters">
+                                <!-- Genre filters will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h4>Price Range</h4>
+                            <div class="filter-options" id="priceFilters">
+                                <!-- Price filters will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h4>Rating</h4>
+                            <div class="filter-options" id="ratingFilters">
+                                <!-- Rating filters will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <button class="clear-filters" onclick="clearFilters()">Clear All Filters</button>
+                    </div>
+                    
+                    <div class="books-grid" id="bookstoreBooks">
+                        <!-- Books will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
+                        <a href="#" class="btn btn-outline" id="prevPage"><i class="fas fa-chevron-left"></i> Previous</a>
+                        <div id="pageNumbers" style="display: flex; gap: 5px;"></div>
+                        <a href="#" class="btn btn-outline" id="nextPage">Next <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Book Detail Page -->
+        <section id="book-detail" class="page-section">
+            <div class="book-detail">
+                <div class="container">
+                    <div class="book-detail-container" id="bookDetailContainer">
+                        <!-- Book details will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Page -->
+        <section id="blog" class="page-section">
+            <div class="blog-preview">
+                <div class="container">
+                    <h2 class="section-title">Bookish Blog</h2>
+                    <div class="blog-grid" id="blogPosts">
+                        <!-- Blog posts will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Detail Page -->
+        <section id="blog-detail" class="page-section">
+            <div class="blog-detail">
+                <div class="container">
+                    <div class="blog-detail-container" id="blogDetailContainer">
+                        <!-- Blog details will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shopping Cart -->
+        <section id="cart" class="page-section">
+            <div class="cart">
+                <div class="container">
+                    <h2 class="section-title">Your Shopping Cart</h2>
+                    <div class="cart-container" id="cartContainer">
+                        <!-- Cart content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Checkout Page -->
+        <section id="checkout" class="page-section">
+            <div class="checkout">
+                <div class="container">
+                    <h2 class="section-title">Checkout</h2>
+                    <div class="checkout-container">
+                        <div class="checkout-form">
+                            <form id="checkoutForm">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" required>
+                                    <div class="error-message" id="nameError">Please enter your full name</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" required>
+                                    <div class="error-message" id="emailError">Please enter a valid email</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="address">Shipping Address</label>
+                                    <textarea id="address" rows="3" required></textarea>
+                                    <div class="error-message" id="addressError">Please enter your shipping address</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" required>
+                                    <div class="error-message" id="cityError">Please enter your city</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="zip">ZIP / Postal Code</label>
+                                    <input type="text" id="zip" required>
+                                    <div class="error-message" id="zipError">Please enter a valid ZIP code</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="country">Country</label>
+                                    <select id="country" required>
+                                        <option value="">Select Country</option>
+                                        <option value="US">United States</option>
+                                        <option value="UK">United Kingdom</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="AU">Australia</option>
+                                    </select>
+                                    <div class="error-message" id="countryError">Please select your country</div>
+                                </div>
+                                
+                                <h3>Payment Information</h3>
+                                
+                                <div class="form-group">
+                                    <label for="cardName">Name on Card</label>
+                                    <input type="text" id="cardName" required>
+                                    <div class="error-message" id="cardNameError">Please enter the name on card</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cardNumber">Card Number</label>
+                                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                                    <div class="error-message" id="cardNumberError">Please enter a valid card number</div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                    <div class="form-group">
+                                        <label for="expDate">Expiration Date</label>
+                                        <input type="text" id="expDate" placeholder="MM/YY" required>
+                                        <div class="error-message" id="expDateError">Please enter a valid expiration date</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cvv">CVV</label>
+                                        <input type="text" id="cvv" placeholder="123" required>
+                                        <div class="error-message" id="cvvError">Please enter a valid CVV</div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Complete Purchase</button>
+                            </form>
+                        </div>
+                        
+                        <div class="checkout-summary">
+                            <h3>Order Summary</h3>
+                            <div id="orderSummary">
+                                <!-- Order summary will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- User Dashboard -->
+        <section id="dashboard" class="page-section">
+            <div class="dashboard">
+                <div class="container">
+                    <h2 class="section-title">Your Dashboard</h2>
+                    <div class="dashboard-container">
+                        <div class="dashboard-sidebar">
+                            <ul class="dashboard-nav">
+                                <li><a href="#" class="active" onclick="showDashboardSection('overview')"><i class="fas fa-tachometer-alt"></i> Overview</a></li>
+                                <li><a href="#" onclick="showDashboardSection('orders')"><i class="fas fa-shopping-bag"></i> Orders</a></li>
+                                <li><a href="#" onclick="showDashboardSection('favorites')"><i class="fas fa-heart"></i> Favorites</a></li>
+                                <li><a href="#" onclick="showDashboardSection('wishlist')"><i class="fas fa-bookmark"></i> Wishlist</a></li>
+                                <li><a href="#" onclick="showDashboardSection('settings')"><i class="fas fa-cog"></i> Settings</a></li>
+                            </ul>
+                        </div>
+                        <div class="dashboard-content">
+                            <div id="dashboard-overview" class="dashboard-section active">
+                                <h3>Account Overview</h3>
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <i class="fas fa-book fa-2x"></i>
+                                        <div class="stat-value" id="statBooksPurchased">0</div>
+                                        <div class="stat-label">Books Purchased</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <i class="fas fa-heart fa-2x"></i>
+                                        <div class="stat-value" id="statFavoriteBooks">0</div>
+                                        <div class="stat-label">Favorite Books</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <i class="fas fa-comments fa-2x"></i>
+                                        <div class="stat-value" id="statComments">0</div>
+                                        <div class="stat-label">Comments Posted</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <i class="fas fa-star fa-2x"></i>
+                                        <div class="stat-value" id="statRating">0.0</div>
+                                        <div class="stat-label">Average Rating</div>
+                                    </div>
+                                </div>
+                                <div style="background: white; padding: 20px; border-radius: var(--border-radius);">
+                                    <canvas id="readingChart"></canvas>
+                                </div>
+                            </div>
+                            <div id="dashboard-orders" class="dashboard-section">
+                                <h3>Order History</h3>
+                                <div class="order-history">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Order #</th>
+                                                <th>Date</th>
+                                                <th>Items</th>
+                                                <th>Total</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="orderHistoryBody">
+                                            <!-- Orders will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="dashboard-favorites" class="dashboard-section">
+                                <h3>Favorite Books</h3>
+                                <div class="books-grid" id="favoritesGrid">
+                                    <!-- Favorites will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div id="dashboard-wishlist" class="dashboard-section">
+                                <h3>Your Wishlist</h3>
+                                <div class="books-grid" id="wishlistGrid">
+                                    <!-- Wishlist will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div id="dashboard-settings" class="dashboard-section">
+                                <h3>Account Settings</h3>
+                                <form id="settingsForm" style="max-width: 500px;">
+                                    <div style="margin-bottom: 20px;">
+                                        <label for="userFullName">Full Name</label>
+                                        <input type="text" id="userFullName" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" value="John Doe">
+                                    </div>
+                                    <div style="margin-bottom: 20px;">
+                                        <label for="userEmail">Email Address</label>
+                                        <input type="email" id="userEmail" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" value="john@example.com">
+                                    </div>
+                                    <div style="margin-bottom: 20px;">
+                                        <label for="userPassword">Password</label>
+                                        <input type="password" id="userPassword" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" placeholder="••••••••">
+                                    </div>
+                                    <button type="submit" class="btn">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section id="login" class="page-section">
+            <div class="featured-books" style="min-height: 70vh;">
+                <div class="container" style="max-width: 500px;">
+                    <div style="background: white; padding: 40px; border-radius: var(--border-radius); box-shadow: var(--shadow);">
+                        <h2 class="section-title">Sign In to Your Account</h2>
+                        <form id="loginForm">
+                            <div style="margin-bottom: 20px;">
+                                <label for="loginEmail">Email Address</label>
+                                <input type="email" id="loginEmail" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" required>
+                            </div>
+                            <div style="margin-bottom: 20px; text-align: right;">
+                                <a href="#" style="color: var(--primary);">Forgot Password?</a>
+                            </div>
+                            <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+                        </form>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <p>Don't have an account? <a href="#" style="color: var(--primary);" onclick="showPage('register')">Register here</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Registration Page -->
+        <section id="register" class="page-section">
+            <div class="featured-books" style="min-height: 70vh;">
+                <div class="container" style="max-width: 500px;">
+                    <div style="background: white; padding: 40px; border-radius: var(--border-radius); box-shadow: var(--shadow);">
+                        <h2 class="section-title">Create an Account</h2>
+                        <form id="registerForm">
+                            <div style="margin-bottom: 20px;">
+                                <label for="regName">Full Name</label>
+                                <input type="text" id="regName" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label for="regEmail">Email Address</label>
+                                <input type="email" id="regEmail" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label for="regPassword">Password</label>
+                                <input type="password" id="regPassword" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);" required>
+                            </div>
+                            <button type="submit" class="btn" style="width: 100%;">Register</button>
+                        </form>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <p>Already have an account? <a href="#" style="color: var(--primary);" onclick="showPage('login')">Login here</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>Join Our Bookish Community</h2>
+                <p>Subscribe to our newsletter for exclusive deals, new releases, and literary content delivered to your inbox.</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <input type="email" placeholder="Your email address" id="newsletterEmail" aria-label="Email address">
+                    <button type="button" onclick="subscribeNewsletter()">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>BookNook</h4>
+                    <p>Your literary escape since 2010. We're passionate about connecting readers with their next favorite book.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="showPage('home')">Home</a></li>
+                        <li><a href="#" onclick="showPage('bookstore')">Shop</a></li>
+                        <li><a href="#" onclick="showPage('blog')">Blog</a></li>
+                        <li><a href="#" onclick="showPage('about')">About Us</a></li>
+                        <li><a href="#" onclick="showPage('contact')">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Customer Service</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Book Street, Litville</li>
+                        <li><i class="fas fa-phone"></i> (555) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> hello@booknook.com</li>
+                        <li><i class="fas fa-clock"></i> Mon-Fri: 9am-6pm</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 BookNook. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
